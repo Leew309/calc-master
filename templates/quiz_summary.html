@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>הסטטיסטיקות שלי - Calc Master</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* כל הסגנונות נשארים אותו דבר */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .big-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .topics-table {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .topics-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .topics-table th,
+        .topics-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .topics-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .recent-results {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 50px 0;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .topic-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .topic-derivatives { background: #3b82f6; }
+        .topic-integrals { background: #10b981; }
+        .topic-limits { background: #f59e0b; }
+        .topic-criticalpoints { background: #ef4444; }
+        .topic-general { background: #8b5cf6; }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← חזרה לדף הבית</a>
+        
+        <div class="header">
+            <h1>📊 הסטטיסטיקות שלי</h1>
+            <p>מעקב אחרי ההתקדמות והישגים שלך במתמטיקה</p>
+        </div>
+
+        <div id="loading" class="loading">
+            📈 טוען נתונים...
+        </div>
+
+        <div id="stats-content" style="display: none;">
+            <!-- סטטיסטיקות כלליות -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>🎯 ציון ממוצע</h3>
+                    <div id="avg-score" class="big-number">0%</div>
+                    <div class="stat-label">מכל המבחנים</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>📝 סה"כ מבחנים</h3>
+                    <div id="total-quizzes" class="big-number">0</div>
+                    <div class="stat-label">מבחנים שהושלמו</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>✅ תשובות נכונות</h3>
+                    <div id="total-correct" class="big-number">0</div>
+                    <div class="stat-label">מתוך <span id="total-questions">0</span> שאלות</div>
+                </div>
+            </div>
+
+            <!-- גרף ציונים לפי נושא -->
+            <div class="chart-container">
+                <h3>📈 ביצועים לפי נושא</h3>
+                <canvas id="topicsChart" width="400" height="200"></canvas>
+            </div>
+
+            <!-- טבלת נושאים -->
+            <div class="topics-table">
+                <h3>📚 פירוט לפי נושא</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>נושא</th>
+                            <th>מבחנים</th>
+                            <th>ציון ממוצע</th>
+                            <th>הישג טוב ביותר</th>
+                            <th>דירוג</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topics-tbody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- תוצאות אחרונות -->
+            <div class="recent-results">
+                <h3>🕒 המבחנים האחרונים</h3>
+                <div id="recent-results-list">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // מפת שמות נושאים בעברית
+        const topicNames = {
+            'derivatives': 'נגזרות',
+            'integrals': 'אינטגרלים',
+            'limits': 'גבולות',
+            'criticalpoints': 'נקודות קיצון',
+            'general': 'מעורב'
+        };
+
+        // צבעים לנושאים
+        const topicColors = {
+            'derivatives': '#3b82f6',
+            'integrals': '#10b981',
+            'limits': '#f59e0b',
+            'criticalpoints': '#ef4444',
+            'general': '#8b5cf6'
+        };
+
+        async function loadStats() {
+            try {
+                // טעינת נתונים מכל ה-APIs
+                const [generalResponse, topicsResponse, recentResponse] = await Promise.all([
+                    fetch('/api/stats/general'),
+                    fetch('/api/stats/by-topic'),
+                    fetch('/api/stats/recent?limit=5')
+                ]);
+
+                const generalStats = await generalResponse.json();
+                const topicsStats = await topicsResponse.json();
+                const recentResults = await recentResponse.json();
+
+                // עדכון סטטיסטיקות כלליות
+                updateGeneralStats(generalStats);
+                
+                // יצירת גרף
+                createTopicsChart(topicsStats);
+                
+                // עדכון טבלת נושאים
+                updateTopicsTable(topicsStats);
+                
+                // עדכון תוצאות אחרונות
+                updateRecentResults(recentResults);
+
+                // הצגת התוכן
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('stats-content').style.display = 'block';
+
+            } catch (error) {
+                console.error('שגיאה בטעינת נתונים:', error);
+                document.getElementById('loading').innerHTML = '<div class="error">שגיאה בטעינת הנתונים. אנא נסה שוב.</div>';
+            }
+        }
+
+        function updateGeneralStats(stats) {
+            // שימוש בשמות הנכונים של השדות
+            document.getElementById('avg-score').textContent = Math.round(stats.average_score || 0) + '%';
+            document.getElementById('total-quizzes').textContent = stats.total_quizzes || 0;
+            document.getElementById('total-correct').textContent = stats.total_correct || 0;
+            document.getElementById('total-questions').textContent = stats.total_questions || 0;
+        }
+
+        function createTopicsChart(topicsStats) {
+            const ctx = document.getElementById('topicsChart').getContext('2d');
+            
+            const labels = topicsStats.map(topic => topicNames[topic.topic] || topic.topic);
+            const data = topicsStats.map(topic => topic.avg_score || 0);
+            const colors = topicsStats.map(topic => topicColors[topic.topic] || '#666');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'ציון ממוצע (%)',
+                        data: data,
+                        backgroundColor: colors,
+                        borderRadius: 8,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTopicsTable(topicsStats) {
+            const tbody = document.getElementById('topics-tbody');
+            tbody.innerHTML = '';
+
+            if (topicsStats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">עדיין לא ביצעת מבחנים</td></tr>';
+                return;
+            }
+
+            topicsStats.forEach(topic => {
+                const row = document.createElement('tr');
+                
+                const avgScore = topic.avg_score || 0;
+                const grade = avgScore >= 90 ? '🏆 מעולה' : 
+                             avgScore >= 80 ? '⭐ טוב מאוד' :
+                             avgScore >= 70 ? '👍 טוב' :
+                             avgScore >= 60 ? '⚠️ עובר' : '❌ צריך שיפור';
+
+                row.innerHTML = `
+                    <td><span class="topic-badge topic-${topic.topic}">${topicNames[topic.topic] || topic.topic}</span></td>
+                    <td>${topic.attempts || 0}</td>
+                    <td>${avgScore}%</td>
+                    <td>${topic.best_score || 0}%</td>
+                    <td>${grade}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateRecentResults(results) {
+            const container = document.getElementById('recent-results-list');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">עדיין לא ביצעת מבחנים</p>';
+                return;
+            }
+
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                
+                const date = new Date(result.date).toLocaleDateString('he-IL');
+                const time = result.time_spent ? formatTime(result.time_spent) : '';
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="topic-badge topic-${result.topic}">${topicNames[result.topic] || result.topic}</span>
+                        <span style="margin-right: 10px;">${date}</span>
+                    </div>
+                    <div>
+                        <strong>${result.percentage.toFixed(1)}%</strong>
+                        <span style="color: #666; margin-right: 10px;">(${result.score}/${result.total_questions})</span>
+                        ${time ? `<span style="color: #666;">⏱️ ${time}</span>` : ''}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            if (minutes > 0) {
+                return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            return `${seconds}ש`;
+        }
+
+        // load the data 
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

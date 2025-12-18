@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Calc Master - שאלון</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylestopics.css') }}">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['\\[', '\\]']]
+            },
+            startup: {
+                pageReady: () => {
+                    return MathJax.startup.defaultPageReady().then(() => {
+                        console.log('MathJax startup complete');
+                    });
+                }
+            }
+        };
+    </script>
+    
+    <!-- תיקון יישור למרכז -->
+    <style>
+        .container {
+            text-align: center !important;
+        }
+        
+        .quiz-card {
+            text-align: center !important;
+        }
+        
+        .question-text {
+            text-align: center !important;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .option-btn {
+            text-align: center !important;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .feedback-content {
+            text-align: center !important;
+        }
+        
+        .error-analysis-section {
+            text-align: center !important;
+        }
+        
+        .error-analysis-section h4,
+        .error-analysis,
+        .common-mistake,
+        .how-to-solve,
+        .practice-suggestion {
+            text-align: center !important;
+        }
+        
+        h1, h2, h3, h4, p {
+            text-align: center !important;
+        }
+        
+        .back-button {
+            margin-bottom: 20px;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #6366f1;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+        
+        .btn-back:hover {
+            background: #4f46e5;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-button">
+            <a href="/" class="btn-back">← חזרה לדף הבית</a>
+        </div>
+
+        <h1 id="topic-title">📚 שאלון</h1>
+        <div class="topic-description">
+            <p id="topic-description">טוען...</p>
+        </div>
+
+        <div id="questions-container"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/quizEngine.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const topic = urlParams.get('topic') || 'derivatives';
+            const difficulty = urlParams.get('difficulty') || 'basic';
+            
+            console.log("🚀 מתחיל טעינת מבחן:", { topic, difficulty });
+            
+            if (topic === 'personalized') {
+                document.getElementById('page-title').textContent = 'מבחן אישי - Calc Master';
+                document.getElementById('topic-title').textContent = '🤖 מבחן אישי חכם';
+                document.getElementById('topic-description').textContent = 'טוען ניתוח אישי...';
+                
+                fetch('/api/personalized/analysis')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("📊 ניתוח אישי התקבל:", data);
+                        if (data.success && data.analysis) {
+                            const analysis = data.analysis;
+                            let description = '';
+                            
+                            if (analysis.needs_improvement) {
+                                description = `מבחן ממוקד ב${analysis.weak_topic_hebrew} - נושא לשיפור (ציון נוכחי: ${analysis.avg_score}%)`;
+                            } else {
+                                description = 'מבחן מאתגר - הביצועים שלך טובים!';
+                            }
+                            
+                            document.getElementById('topic-description').textContent = description;
+                        } else {
+                            document.getElementById('topic-description').textContent = 'מבחן אישי מותאם לך';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ שגיאה בטעינת ניתוח:', error);
+                        document.getElementById('topic-description').textContent = 'מבחן אישי מותאם לך';
+                    });
+                
+                setTimeout(() => {
+                    if (typeof populateQuizFromApi === 'function') {
+                        populateQuizFromApi("questions-container", "/api/questions/personalized");
+                        console.log("✅ נטען מבחן אישי");
+                    } else {
+                        console.error("❌ populateQuizFromApi לא נמצא");
+                        document.getElementById('questions-container').innerHTML = 
+                            '<div class="error">שגיאה בטעינת המערכת. אנא רענן את הדף.</div>';
+                    }
+                }, 500);
+                
+                return; 
+            }
+            
+            const topicConfig = {
+                derivatives: {
+                    title: "📈 נגזרות",
+                    description: "בחן את הידע שלך בנגזרות - 10 שאלות מותאמות אישית",
+                    api: "/api/questions/derivatives/basic",
+                    pageTitle: "נגזרות - Calc Master"
+                },
+                integrals: {
+                    title: "🧮 אינטגרלים", 
+                    description: "בחן את הידע שלך באינטגרלים - 10 שאלות מותאמות",
+                    api: "/api/questions/integrals/basic",
+                    pageTitle: "אינטגרלים - Calc Master"
+                },
+                limits: {
+                    title: "📏 גבולות",
+                    description: "בחן את הידע שלך בגבולות - 10 שאלות מותאמות", 
+                    api: "/api/questions/limits/basic",
+                    pageTitle: "גבולות - Calc Master"
+                },
+                criticalpoints: {
+                    title: "🎯 נקודות קיצון",
+                    description: "בחן את הידע שלך בנקודות קיצון - 10 שאלות מותאמות",
+                    api: "/api/questions/criticalpoints", 
+                    pageTitle: "נקודות קיצון - Calc Master"
+                },
+                general: {
+                    title: "🌟 מבחן מעורב",
+                    description: "שאלון מכל הנושאים: אינטגרלים, גבולות, נגזרות, נקודות קיצון",
+                    api: "/api/questions/general",
+                    pageTitle: "מבחן מעורב - Calc Master"
+                }
+            };
+            
+            const config = topicConfig[topic];
+
+            if (!config) {
+                document.getElementById('topic-title').textContent = "❌ נושא לא נמצא";
+                document.getElementById('topic-description').textContent = "הנושא שביקשת לא קיים";
+                return;
+            }
+
+            let apiUrl = config.api;
+            if (difficulty !== 'basic' && difficulty !== 'mixed') {
+                apiUrl = `/api/questions/${topic}/${difficulty}`;
+            }
+
+            document.getElementById('page-title').textContent = config.pageTitle;
+            document.getElementById('topic-title').textContent = config.title;
+            
+            let description = config.description;
+            if (difficulty !== 'basic') {
+                const difficultyNames = {
+                    'easy': 'רמה קלה',
+                    'medium': 'רמה בינונית', 
+                    'hard': 'רמה קשה',
+                    'mixed': 'רמה מעורבת'
+                };
+                description += ` - ${difficultyNames[difficulty] || ''}`;
+            }
+            document.getElementById('topic-description').textContent = description;
+
+            setTimeout(() => {
+                if (typeof populateQuizFromApi === 'function') {
+                    populateQuizFromApi("questions-container", apiUrl);
+                    console.log(`✅ נטענו שאלות ${topic} - רמה: ${difficulty}`);
+                } else {
+                    console.error("❌ populateQuizFromApi לא נמצא");
+                    document.getElementById('questions-container').innerHTML = 
+                        '<div class="error">שגיאה בטעינת המערכת. אנא רענן את הדף.</div>';
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

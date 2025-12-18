@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">בחירת רמת קושי - Calc Master</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            margin-bottom: 30px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .difficulty-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .difficulty-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .difficulty-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--accent-color);
+        }
+
+        .difficulty-easy {
+            --accent-color: #10b981;
+        }
+
+        .difficulty-medium {
+            --accent-color: #f59e0b;
+        }
+
+        .difficulty-hard {
+            --accent-color: #ef4444;
+        }
+
+        .difficulty-mixed {
+            --accent-color: #8b5cf6;
+        }
+
+        .difficulty-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .difficulty-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .difficulty-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .quick-start {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .quick-start h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .quick-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .difficulty-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .difficulty-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-button">
+            <a href="/" class="btn-back">← חזרה לדף הבית</a>
+        </div>
+
+        <div class="header">
+            <h1 id="topic-title">📈 נגזרות</h1>
+            <p>בחר את רמת הקושי המתאימה לך</p>
+        </div>
+
+        <div class="difficulty-grid">
+            <div class="difficulty-card difficulty-easy" onclick="startQuiz('easy')">
+                <span class="difficulty-icon">🟢</span>
+                <div class="difficulty-title">קל</div>
+                <div class="difficulty-description">
+                    נגזרות בסיסיות של פונקציות פשוטות.
+                    מתאים למתחילים ולחזרה על היסודות.
+                </div>
+                <div class="difficulty-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">שאלות</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">5-8</div>
+                        <div class="stat-label">דקות</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="difficulty-card difficulty-medium" onclick="startQuiz('medium')">
+                <span class="difficulty-icon">🟡</span>
+                <div class="difficulty-title">בינוני</div>
+                <div class="difficulty-description">
+                    נגזרות של פונקציות מורכבות וכלל השרשרת.
+                    מתאים לאחרי שליטה ביסודות.
+                </div>
+                <div class="difficulty-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">שאלות</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">8-12</div>
+                        <div class="stat-label">דקות</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="difficulty-card difficulty-hard" onclick="startQuiz('hard')">
+                <span class="difficulty-icon">🔴</span>
+                <div class="difficulty-title">קשה</div>
+                <div class="difficulty-description">
+                    נגזרות מתקדמות, נגזרות של פונקציות הפוכות
+                    ופונקציות מורכבות מאוד.
+                </div>
+                <div class="difficulty-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">שאלות</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">12-20</div>
+                        <div class="stat-label">דקות</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="difficulty-card difficulty-mixed" onclick="startQuiz('mixed')">
+                <span class="difficulty-icon">🌈</span>
+                <div class="difficulty-title">מעורב</div>
+                <div class="difficulty-description">
+                    שילוב של שאלות מכל הרמות.
+                    מתאים לבחינה מקיפה של הידע.
+                </div>
+                <div class="difficulty-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">10</div>
+                        <div class="stat-label">שאלות</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">10-15</div>
+                        <div class="stat-label">דקות</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-start">
+            <h3>🚀 התחלה מהירה</h3>
+            <p>לא בטוח איזה רמה מתאימה לך? התחל עם הרמה הקלה ועבור הלאה</p>
+            <a href="#" class="quick-btn" onclick="startQuiz('easy')">התחל מהקל</a>
+        </div>
+    </div>
+
+    <script>
+        // קבלת הנושא מה-URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const topic = urlParams.get('topic') || 'derivatives';
+
+        // הגדרות נושאים
+        const topicConfig = {
+            derivatives: {
+                title: "📈 נגזרות",
+                descriptions: {
+                    easy: "נגזרות בסיסיות של פונקציות פשוטות. מתאים למתחילים ולחזרה על היסודות.",
+                    medium: "נגזרות של פונקציות מורכבות וכלל השרשרת. מתאים לאחרי שליטה ביסודות.",
+                    hard: "נגזרות מתקדמות, נגזרות של פונקציות הפוכות ופונקציות מורכבות מאוד.",
+                    mixed: "שילוב של שאלות מכל הרמות. מתאים לבחינה מקיפה של הידע."
+                }
+            },
+            integrals: {
+                title: "🧮 אינטגרלים",
+                descriptions: {
+                    easy: "אינטגרלים בסיסיים של פונקציות פשוטות. מתאים למתחילים.",
+                    medium: "אינטגרלים בהצבה ובחלקים. מתאים לרמה בינונית.",
+                    hard: "אינטגרלים מתקדמים ופונקציות מורכבות. מתאים למתקדמים.",
+                    mixed: "שילוב של שאלות מכל הרמות באינטגרלים."
+                }
+            },
+            limits: {
+                title: "📏 גבולות",
+                descriptions: {
+                    easy: "גבולות בסיסיים של פונקציות פשוטות. מתאים למתחילים.",
+                    medium: "גבולות עם צורות בלתי מוגדרות וכללי לופיטל. רמה בינונית.",
+                    hard: "גבולות מתקדמים ופונקציות מורכבות. מתאים למתקדמים.",
+                    mixed: "שילוב של שאלות מכל הרמות בגבולות."
+                }
+            },
+            criticalpoints: {
+                title: "🎯 נקודות קיצון",
+                descriptions: {
+                    easy: "מציאת נקודות קיצון בפונקציות פשוטות. מתאים למתחילים.",
+                    medium: "ניתוח פונקציות ומציאת מקסימום ומינימום. רמה בינונית.",
+                    hard: "ניתוח מתקדם של פונקציות מורכבות. מתאים למתקדמים.",
+                    mixed: "שילוב של שאלות מכל הרמות בנקודות קיצון."
+                }
+            }
+        };
+
+        // עדכון הדף בהתאם לנושא
+        document.addEventListener('DOMContentLoaded', function() {
+            const config = topicConfig[topic];
+            if (config) {
+                document.getElementById('topic-title').textContent = config.title;
+                document.getElementById('page-title').textContent = `בחירת רמת קושי - ${config.title.slice(2)} - Calc Master`;
+                
+                // עדכון התיאורים
+                document.querySelectorAll('.difficulty-description').forEach((desc, index) => {
+                    const difficulties = ['easy', 'medium', 'hard', 'mixed'];
+                    desc.textContent = config.descriptions[difficulties[index]];
+                });
+            }
+        });
+
+        function startQuiz(difficulty) {
+            let apiUrl;
+            
+            if (difficulty === 'mixed') {
+                // עבור מעורב, השתמש ב-API הבסיסי
+                apiUrl = `/quiz?topic=${topic}`;
+            } else {
+                // עבור רמות ספציפיות
+                apiUrl = `/quiz?topic=${topic}&difficulty=${difficulty}`;
+            }
+            
+            window.location.href = apiUrl;
+        }
+    </script>
+</body>
+</html>
