@@ -1,29 +1,35 @@
-# CalcMaster
+# 🎓 CalcMaster
 
-CalcMaster is a web-based system for practicing math questions with automatic
-generation, validation, and feedback.
+**CalcMaster** is a Python + Flask web application for practicing mathematics through  
+automatically generated quizzes with instant validation and feedback.
 
-## Features
-- Dynamic question generation
-- Step-by-step answer validation
-- Instant feedback and scoring
+The system focuses on core calculus topics and is designed to be modular, extensible,  
+and easy to run locally.
 
-## Architecture
-The system is built with a clear separation between:
-- Question generation logic
-- Answer validation engine
-- Web interface (Flask)
+---
 
-See the architecture diagram below.
+## ✨ Features
+- 📚 Topic-based quizzes:
+  - Limits
+  - Derivatives
+  - Integrals
+  - Critical points
+- 🎯 Difficulty selection
+- ⚡ Instant answer validation
+- 📊 Quiz summary and feedback at the end
 
-## Tech Stack
-- Python
-- Flask
-- SymPy
-- HTML/CSS
+---
 
-## How to Run
+## 🛠 Tech Stack
+- **Python**
+- **Flask**
+- **SymPy**
+- HTML / CSS / JavaScript
+
+---
+
+## 🚀 Run Locally
+
 ```bash
-git clone https://github.com/Leew309/calc-master.git
 pip install -r requirements.txt
 python app.py
